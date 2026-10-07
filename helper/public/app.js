@@ -83,10 +83,16 @@ function guessName() {
   return 'My device';
 }
 
+let build = null;
 async function api(path, options = {}) {
   const res = await fetch(path, { credentials: 'same-origin', ...options });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) throw Object.assign(new Error(body.error || res.statusText), { status: res.status });
+  // Kit was updated while this page was open: reload onto the new app.
+  if (body.build) {
+    if (build && body.build !== build) location.reload();
+    build = body.build;
+  }
   return body;
 }
 

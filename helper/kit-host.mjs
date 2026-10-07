@@ -191,7 +191,12 @@ function serveStatic(req, res, pathname) {
   const file = path.resolve(PUBLIC, rel);
   if (!file.startsWith(PUBLIC + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, { error: 'Not found' });
   const type = MIME[path.extname(file)] ?? 'application/octet-stream';
-  // Always revalidate: after a Kit update, devices must never mix old CSS/JS with new HTML.
+  if (type.startsWith('text/html')) {
+    // Stamp asset URLs with the build so an updated app can never load from a stale cache.
+    res.writeHead(200, { 'content-type': type, 'cache-control': 'no-store', 'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer', 'content-security-policy': PAGE_CSP, 'x-frame-options': 'DENY' });
+    return res.end(fs.readFileSync(file, 'utf8').replace(/(href|src)="\/(app\.(?:css|js))"/g, `$1="/$2?v=${build()}"`));
+  }
+  // Everything else revalidates (304 when unchanged).
   const { size, mtimeMs } = fs.statSync(file);
   const etag = `"${size.toString(36)}-${Math.floor(mtimeMs).toString(36)}"`;
   if (req.headers['if-none-match'] === etag) return res.writeHead(304, { etag, 'cache-control': 'no-cache' }).end();
@@ -201,9 +206,18 @@ function serveStatic(req, res, pathname) {
     etag,
     'x-content-type-options': 'nosniff',
     'referrer-policy': 'no-referrer',
-    ...(type.startsWith('text/html') && { 'content-security-policy': PAGE_CSP, 'x-frame-options': 'DENY' }),
   });
   fs.createReadStream(file).pipe(res);
+}
+
+// Build id = newest change in public/. Open pages compare it and reload themselves after an update.
+function build() {
+  let newest = 0;
+  for (const name of fs.readdirSync(PUBLIC, { recursive: true })) {
+    const stat = fs.statSync(path.join(PUBLIC, name));
+    if (stat.isFile()) newest = Math.max(newest, stat.mtimeMs);
+  }
+  return `${VERSION}-${Math.floor(newest).toString(36)}`;
 }
 
 async function route(req, res) {
@@ -244,7 +258,7 @@ async function route(req, res) {
   const me = whoIs(req, url);
   if (pathname === '/api/me') {
     const join = me?.admin ? { ips: lanAddresses(), port: session.port, code: session.code } : undefined;
-    return send(res, 200, { joined: Boolean(me), id: me?.id, name: me?.name ?? '', host: HOST_NAME, admin: Boolean(me?.admin), join });
+    return send(res, 200, { joined: Boolean(me), id: me?.id, name: me?.name ?? '', host: HOST_NAME, admin: Boolean(me?.admin), join, build: build() });
   }
   if (!me) return send(res, 401, { error: 'Join first' });
 
