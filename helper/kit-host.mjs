@@ -191,9 +191,14 @@ function serveStatic(req, res, pathname) {
   const file = path.resolve(PUBLIC, rel);
   if (!file.startsWith(PUBLIC + path.sep) || !fs.existsSync(file) || !fs.statSync(file).isFile()) return send(res, 404, { error: 'Not found' });
   const type = MIME[path.extname(file)] ?? 'application/octet-stream';
+  // Always revalidate: after a Kit update, devices must never mix old CSS/JS with new HTML.
+  const { size, mtimeMs } = fs.statSync(file);
+  const etag = `"${size.toString(36)}-${Math.floor(mtimeMs).toString(36)}"`;
+  if (req.headers['if-none-match'] === etag) return res.writeHead(304, { etag, 'cache-control': 'no-cache' }).end();
   res.writeHead(200, {
     'content-type': type,
-    'cache-control': type.startsWith('text/html') ? 'no-store' : 'max-age=3600',
+    'cache-control': 'no-cache',
+    etag,
     'x-content-type-options': 'nosniff',
     'referrer-policy': 'no-referrer',
     ...(type.startsWith('text/html') && { 'content-security-policy': PAGE_CSP, 'x-frame-options': 'DENY' }),
