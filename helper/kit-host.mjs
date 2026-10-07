@@ -12,7 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const VERSION = '1.0.0';
+const VERSION = '1.0.1';
 const EXTENSION_ORIGIN = 'chrome-extension://nbmfafaoglnmgabfcmkhcdhfbahgaffl';
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
 const PORTS = [7777, 7778, 7779, 0];

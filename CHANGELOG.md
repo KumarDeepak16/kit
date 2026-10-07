@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.1 — 2026-10-07
+
+**Drop**
+- Open pages update themselves when the helper is updated — no more stale phone UI after an upgrade.
+- Helper web app files always revalidate instead of being cached for an hour.
+
+**Vault**
+- Import page explains the CSV columns and offers a downloadable sample file.
+
+**Docs**
+- CSV format in `docs/VAULT.md`, screenshots and requirements in the README.
+
 ## 1.0.0 — 2026-10-07
 
 First release.
