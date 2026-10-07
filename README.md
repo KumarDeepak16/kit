@@ -5,7 +5,7 @@
 <h1 align="center">Kit</h1>
 
 <p align="center">
-  Three tiny, local-first tools for Chrome — <b>Boost</b>, <b>Vault</b> and <b>Drop</b>.<br>
+  Small, local-first tools for Chrome — <b>Boost</b>, <b>Vault</b>, <b>Drop</b>, and more to come.<br>
   No account. No cloud. No tracking.
 </p>
 
