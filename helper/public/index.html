@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="robots" content="noindex">
+  <title>Kit Drop</title>
+  <link rel="icon" href="/kit.svg">
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <header class="top">
+    <span class="brand"><img src="/kit.svg" alt="" width="30" height="30"><span>kit</span><em>drop</em></span>
+    <button class="pill" id="status" type="button" title="Rename this device"><i></i><span>Connecting</span></button>
+  </header>
+
+  <div class="layout">
+    <aside class="side" id="side" hidden>
+      <h2>Invite a device</h2>
+      <div class="qr" id="side-qr"></div>
+      <p class="side-hint">Scan with a phone camera, or open the address and type the code.</p>
+      <button class="addr" id="side-addr" type="button" title="Copy link"></button>
+      <div class="code" id="side-code" aria-label="Join code"></div>
+      <button class="net" id="side-net" type="button" hidden></button>
+      <h3>Connected</h3>
+      <ul class="people" id="side-people"></ul>
+    </aside>
+
+    <div class="col">
+      <main id="app">
+        <form class="screen" id="screen-code" hidden>
+          <div class="glyph"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></div>
+          <h1>Enter the code from Kit</h1>
+          <p>On your computer: Kit → Drop. Type the 6 characters shown under the QR.</p>
+          <input id="code" maxlength="6" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" placeholder="ABC123" aria-label="Code">
+          <button class="btn primary" type="submit">Join</button>
+          <small class="err" id="code-err"></small>
+        </form>
+
+        <form class="screen" id="screen-name" hidden>
+          <div class="glyph purple"><svg viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M11 18.5h2"/></svg></div>
+          <h1>Name this device</h1>
+          <p>So everyone knows what came from where.</p>
+          <input id="name" maxlength="40" autocomplete="nickname" placeholder="Deepak's phone" aria-label="Device name">
+          <button class="btn primary" type="submit">Continue</button>
+        </form>
+
+        <section class="screen" id="screen-off" hidden>
+          <div class="glyph grey"><svg viewBox="0 0 24 24"><path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/></svg></div>
+          <h1>Drop is off</h1>
+          <p>Turn Drop on in Kit on your computer, then scan the new QR code.</p>
+          <button class="btn" id="retry" type="button">Try again</button>
+        </section>
+
+        <section class="chat" id="screen-chat" hidden>
+          <ul class="thread" id="thread"></ul>
+        </section>
+      </main>
+
+      <form class="composer" id="composer" hidden>
+        <label class="round" title="Photos and videos" aria-label="Send photos">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="4"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-9 9"/></svg>
+          <input type="file" id="photos" accept="image/*,video/*" multiple hidden>
+        </label>
+        <label class="round" title="Files" aria-label="Send files">
+          <svg viewBox="0 0 24 24"><path d="m20 11.5-8 8a5 5 0 0 1-7-7l8.5-8.5a3.3 3.3 0 0 1 4.7 4.7L9.7 17.2a1.7 1.7 0 0 1-2.4-2.4L15 7"/></svg>
+          <input type="file" id="files" multiple hidden>
+        </label>
+        <div class="field">
+          <textarea id="text" rows="1" placeholder="Message" aria-label="Message"></textarea>
+          <button class="paste" id="paste" type="button" title="Paste" aria-label="Paste" hidden>
+            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2.5"/><path d="M9 4V3h6v1"/></svg>
+          </button>
+        </div>
+        <button class="send" id="send" type="submit" aria-label="Send" disabled>
+          <svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="viewer" id="viewer" hidden>
+    <img id="viewer-img" alt="">
+    <div class="viewer-bar">
+      <button class="vbtn" id="viewer-copy" type="button" hidden>
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2.5"/><path d="M5 15V6.5A2.5 2.5 0 0 1 7.5 4H15"/></svg>Copy
+      </button>
+      <a class="vbtn" id="viewer-save" download>
+        <svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Save
+      </a>
+      <button class="vbtn ghost" id="viewer-close" type="button" aria-label="Close">
+        <svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <p class="viewer-tip" id="viewer-tip" hidden>Long-press the image to copy it</p>
+  </div>
+
+  <div class="dropzone" id="dropzone" hidden>Drop files to send</div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

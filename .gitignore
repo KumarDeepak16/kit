@@ -1,0 +1,14 @@
+# The website is deployed separately (Netlify), not part of this repo.
+site/
+
+# Written by helper/install.* for this machine only
+helper/kit-host.cmd
+helper/kit-host.sh
+helper/in.1619.kit.json
+
+# Build output and OS noise
+dist/
+*.zip
+node_modules/
+.DS_Store
+Thumbs.db

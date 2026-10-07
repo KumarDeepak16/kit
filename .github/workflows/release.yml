@@ -1,0 +1,43 @@
+# Tag vX.Y.Z  ->  GitHub Release with kit.zip (extension + helper + docs).
+# The website links to releases/latest/download/kit.zip, so it always serves the newest build.
+name: Release
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check tag matches manifest version
+        run: |
+          manifest="$(jq -r .version extension/manifest.json)"
+          tag="${GITHUB_REF_NAME#v}"
+          if [ "$manifest" != "$tag" ]; then
+            echo "::error::extension/manifest.json is $manifest but the tag is $GITHUB_REF_NAME"
+            exit 1
+          fi
+
+      - name: Check helper syntax
+        run: node --check helper/kit-host.mjs
+
+      - name: Build kit.zip
+        run: |
+          mkdir -p dist/kit
+          cp -r extension helper docs README.md LICENSE PRIVACY.md dist/kit/
+          rm -f dist/kit/helper/kit-host.cmd dist/kit/helper/kit-host.sh dist/kit/helper/in.1619.kit.json
+          chmod +x dist/kit/helper/install.sh
+          cd dist && zip -r -9 -q kit.zip kit
+          unzip -l kit.zip | tail -n 1
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/kit.zip
+          generate_release_notes: true

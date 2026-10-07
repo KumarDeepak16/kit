@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Kit",
+  "short_name": "Kit",
+  "description": "Local-first toolkit: per-tab volume boost, encrypted password vault and Wi-Fi drop between your devices.",
+  "version": "1.0.0",
+  "minimum_chrome_version": "116",
+  "homepage_url": "https://kit.1619.in",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtCJOYKE6U63nhSmvEp8Ca7ic9j4j6OCP8nBt4IsWE8vmKjH6k4zW1EaNBYuu8fgsdXkDR4rUkfSYRGG94A6S/PXitQGk6OzHKBM0wnAeU471EhkmBNYojhMAq5qH4qoULn25HmH6l3a19uwWs8E2XtNmSkn4auZeD7SwlASjVBSGUTrHJtRJRLWVWMmdJEfKFXIsKOzVHsGgyhnn3cDVvtXRD5+F8hs9E0AsS2q7wHecKnMrx9mcNtKUBrkFcupeHAmNdM7sy2ZRoEAAqcRl+8fLi2EkvAJjFDiJLqPAcQJXKgJEgwwGlAKmuaWY+ssFL9HwKyBFhXfl9nrTS0PaSwIDAQAB",
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Kit",
+    "default_icon": {
+      "16": "icons/off/16.png",
+      "32": "icons/off/32.png",
+      "48": "icons/off/48.png",
+      "128": "icons/off/128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/on/16.png",
+    "32": "icons/on/32.png",
+    "48": "icons/on/48.png",
+    "128": "icons/on/128.png"
+  },
+  "background": {
+    "service_worker": "src/background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabCapture",
+    "offscreen",
+    "storage",
+    "alarms",
+    "idle",
+    "nativeMessaging"
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'; connect-src http://127.0.0.1:*"
+  }
+}
