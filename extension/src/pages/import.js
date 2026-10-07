@@ -68,6 +68,12 @@ function pick() {
       h('summary', {}, 'How do I export from Chrome?'),
       h('p', {}, 'Open ', h('code', {}, 'chrome://password-manager/settings'), ', choose ', h('b', {}, 'Export passwords'), ', and save the file.'),
     ),
+    h(
+      'details',
+      { class: 'how' },
+      h('summary', {}, 'Making your own CSV?'),
+      h('p', {}, 'First row is headers: ', h('code', {}, 'url'), ', ', h('code', {}, 'username'), ', ', h('code', {}, 'password'), ' (', h('code', {}, 'name'), ' is used when there\'s no URL). ', h('a', { href: 'sample-import.csv', download: 'kit-sample-import.csv' }, 'Download a sample'), '.'),
+    ),
   );
 }
 

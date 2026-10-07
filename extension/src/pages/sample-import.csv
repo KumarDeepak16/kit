@@ -1,0 +1,6 @@
+name,url,username,password,note
+GitHub,https://github.com/login,you@example.com,Gh-Example-Pass-1,Work account
+Netflix,https://www.netflix.com/login,family@example.com,"comma,and""quote""inside",Commas and quotes need double quotes
+Hotstar,https://www.hotstar.com/in,you@example.com,Hs-Example-Pass-3,
+Router admin,http://192.168.1.1,,admin-Example-4,No username is fine
+Bank (no URL),,customer-12345,Bank-Example-5,Without a URL the name is used as the website

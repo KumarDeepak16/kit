@@ -33,6 +33,23 @@ The **↑** button opens an import page in a new tab (file pickers can't run ins
 3. Kit shows how many logins it found, how many are **new**, and how many you **already have** (same site, username and password). Click **Import**.
 4. **Delete the CSV.** It contains your passwords in plain text.
 
+### CSV format
+
+The first row is the header. Names are case-insensitive and columns can be in any order; extra columns are ignored.
+
+| Field | Accepted column names |
+| --- | --- |
+| Website | `url`, `login_uri`, `website`, `web site`, `uri`, `origin`, `hostname`, `login url` |
+| Name (used as the website when there's no http(s) URL) | `name`, `title` |
+| Username (optional) | `username`, `login_username`, `user name`, `user`, `email`, `login`, `email address` |
+| Password (required) | `password`, `login_password`, `pass` |
+
+- URLs are reduced to the host without `www.` — `https://www.netflix.com/login` becomes `netflix.com`, which is what **Fill** matches against.
+- Rows without a website or a password are skipped.
+- Standard CSV quoting: wrap a field in `"…"` if it contains a comma, quote or line break, and double any quote inside (`"pa""ss"` → `pa"ss`).
+
+Sample: **[sample-import.csv](../extension/src/pages/sample-import.csv)** (also linked from the import page under *Making your own CSV?*).
+
 ## Locking
 
 The vault locks itself:
