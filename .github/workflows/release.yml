@@ -1,4 +1,4 @@
-# Tag vX.Y.Z  ->  GitHub Release with kit.zip (extension + helper + docs).
+# Tag vX.Y.Z  ->  GitHub Release with kit.zip (extension + helper + docs) and, when AMO keys are set, kit-firefox.xpi.
 # The website links to releases/latest/download/kit.zip, so it always serves the newest build.
 name: Release
 
@@ -31,13 +31,32 @@ jobs:
         run: |
           mkdir -p dist/kit
           cp -r extension helper docs README.md LICENSE PRIVACY.md dist/kit/
-          rm -f dist/kit/helper/kit-host.cmd dist/kit/helper/kit-host.sh dist/kit/helper/in.1619.kit.json
+          rm -f dist/kit/helper/kit-host.cmd dist/kit/helper/kit-host.sh dist/kit/helper/in.1619.kit.json dist/kit/helper/in.1619.kit.firefox.json
           chmod +x dist/kit/helper/install.sh
           cd dist && zip -r -9 -q kit.zip kit
           unzip -l kit.zip | tail -n 1
 
+      - name: Build and lint Firefox add-on
+        run: |
+          node scripts/build-firefox.mjs
+          npx --yes web-ext@8 lint --source-dir dist/firefox --self-hosted
+
+      # Firefox only installs signed add-ons. Signing needs AMO API keys as repo secrets;
+      # without them the release ships Chrome-only.
+      - name: Sign Firefox add-on
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          if [ -z "$AMO_JWT_ISSUER" ]; then echo "::warning::AMO_JWT_ISSUER not set, skipping Firefox signing"; exit 0; fi
+          npx --yes web-ext@8 sign --source-dir dist/firefox --channel unlisted \
+            --api-key "$AMO_JWT_ISSUER" --api-secret "$AMO_JWT_SECRET" --artifacts-dir dist/xpi
+          mv dist/xpi/*.xpi dist/kit-firefox.xpi
+
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/kit.zip
+          files: |
+            dist/kit.zip
+            dist/kit-firefox.xpi
           generate_release_notes: true

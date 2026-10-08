@@ -13,7 +13,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const VERSION = '1.0.1';
-const EXTENSION_ORIGIN = 'chrome-extension://nbmfafaoglnmgabfcmkhcdhfbahgaffl';
+// Firefox gives each install its own moz-extension://<uuid> origin, so the extension
+// reports it on start; only an allowed extension can reach this native host at all.
+let extensionOrigin = 'chrome-extension://nbmfafaoglnmgabfcmkhcdhfbahgaffl';
 const PUBLIC = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public');
 const PORTS = [7777, 7778, 7779, 0];
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -54,7 +56,10 @@ process.stdin.on('end', () => {
 process.on('uncaughtException', (err) => log('uncaught', err.stack));
 
 async function command(msg) {
-  if (msg.cmd === 'start') return { type: 'started', ...(await start()) };
+  if (msg.cmd === 'start') {
+    if (/^(chrome|moz)-extension:\/\/[\w-]+$/.test(msg.origin ?? '')) extensionOrigin = msg.origin;
+    return { type: 'started', ...(await start()) };
+  }
   if (msg.cmd === 'stop') return stop(), { type: 'stopped' };
   if (msg.cmd === 'ping') return { type: 'pong', version: VERSION };
   throw new Error(`Unknown command: ${msg.cmd}`);
@@ -226,14 +231,14 @@ async function route(req, res) {
   const { pathname } = url;
   const origin = req.headers.origin;
 
-  if (origin === EXTENSION_ORIGIN) {
+  if (origin === extensionOrigin) {
     res.setHeader('access-control-allow-origin', origin);
     res.setHeader('access-control-allow-methods', 'GET, POST, DELETE');
     res.setHeader('access-control-allow-headers', 'content-type, x-kit-name, x-kit-type');
   }
   if (req.method === 'OPTIONS') return send(res, 204);
   // Only our own page (or the extension) may change anything.
-  if (req.method !== 'GET' && origin && origin !== EXTENSION_ORIGIN && origin !== `http://${req.headers.host}`) return send(res, 403, { error: 'Forbidden' });
+  if (req.method !== 'GET' && origin && origin !== extensionOrigin && origin !== `http://${req.headers.host}`) return send(res, 403, { error: 'Forbidden' });
 
   // Joining: the QR opens /k/<code>; the extension's "open in tab" uses /a/<token>.
   let m;

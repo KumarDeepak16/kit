@@ -1,4 +1,4 @@
-# Registers the Kit helper with Chrome, Edge, Brave and Chromium for the current user.
+# Registers the Kit helper with Chrome, Edge, Brave, Chromium and Firefox for the current user.
 # No admin rights needed. Run again any time (e.g. after moving the Kit folder).
 #   install.ps1             install
 #   install.ps1 -Uninstall  remove
@@ -8,9 +8,12 @@ $ErrorActionPreference = 'Stop'
 
 $HostName = 'in.1619.kit'
 $ExtensionId = 'nbmfafaoglnmgabfcmkhcdhfbahgaffl'
+$FirefoxId = 'kit@1619.in'
 $Here = Split-Path -Parent $MyInvocation.MyCommand.Path
 $Launcher = Join-Path $Here 'kit-host.cmd'
 $ManifestPath = Join-Path $Here "$HostName.json"
+$FirefoxManifestPath = Join-Path $Here "$HostName.firefox.json"
+$FirefoxKey = "HKCU:\Software\Mozilla\NativeMessagingHosts\$HostName"
 $Keys = @(
   "HKCU:\Software\Google\Chrome\NativeMessagingHosts\$HostName",
   "HKCU:\Software\Microsoft\Edge\NativeMessagingHosts\$HostName",
@@ -19,8 +22,8 @@ $Keys = @(
 )
 
 if ($Uninstall) {
-  foreach ($key in $Keys) { if (Test-Path $key) { Remove-Item $key -Force } }
-  Remove-Item $Launcher, $ManifestPath -Force -ErrorAction SilentlyContinue
+  foreach ($key in $Keys + $FirefoxKey) { if (Test-Path $key) { Remove-Item $key -Force } }
+  Remove-Item $Launcher, $ManifestPath, $FirefoxManifestPath -Force -ErrorAction SilentlyContinue
   Write-Host 'Kit helper removed.' -ForegroundColor Green
   exit 0
 }
@@ -37,7 +40,7 @@ if ($Major -lt 18) {
   exit 1
 }
 
-# Chrome launches this .cmd with stdin/stdout wired to the extension.
+# The browser launches this .cmd with stdin/stdout wired to the extension.
 [IO.File]::WriteAllText($Launcher, "@echo off`r`n`"$Node`" `"%~dp0kit-host.mjs`" %*`r`n", [Text.Encoding]::ASCII)
 
 $Manifest = [ordered]@{
@@ -53,6 +56,18 @@ foreach ($key in $Keys) {
   New-Item -Path $key -Force | Out-Null
   Set-Item -Path $key -Value $ManifestPath
 }
+
+# Firefox allows extensions by add-on id instead of origin, so it gets its own manifest.
+$FirefoxManifest = [ordered]@{
+  name               = $HostName
+  description        = 'Kit helper: local Wi-Fi server for Drop'
+  path               = $Launcher
+  type               = 'stdio'
+  allowed_extensions = @($FirefoxId)
+} | ConvertTo-Json
+[IO.File]::WriteAllText($FirefoxManifestPath, $FirefoxManifest, (New-Object Text.UTF8Encoding $false))
+New-Item -Path $FirefoxKey -Force | Out-Null
+Set-Item -Path $FirefoxKey -Value $FirefoxManifestPath
 
 Write-Host ''
 Write-Host '  Kit helper installed.' -ForegroundColor Green

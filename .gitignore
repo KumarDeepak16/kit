@@ -5,6 +5,7 @@ site/
 helper/kit-host.cmd
 helper/kit-host.sh
 helper/in.1619.kit.json
+helper/in.1619.kit.firefox.json
 
 # Build output and OS noise
 dist/

@@ -94,7 +94,7 @@ export default {
         'div',
         { class: 'pane gate setup' },
         h('h2', {}, 'One-time setup'),
-        h('p', { class: 'hint' }, 'Drop runs a tiny server on this computer. Chrome needs a helper for that.'),
+        h('p', { class: 'hint' }, 'Drop runs a tiny server on this computer. Your browser needs a helper for that.'),
         h(
           'ol',
           { class: 'steps' },

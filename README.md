@@ -46,6 +46,7 @@
 | | Needed for | Details |
 | --- | --- | --- |
 | **Chromium browser 116+** | Everything | Chrome, Edge, Brave, Arc, Vivaldi, Opera… on Windows, macOS or Linux |
+| **or Firefox 128+** | Everything | Boost can't use tab capture there, so DRM players (Netflix, Spotify…) can't be boosted |
 | **Developer mode** | Installing | Kit isn't on the Chrome Web Store yet, so it's loaded unpacked |
 | **[Node.js 18+](https://nodejs.org)** | Drop only | Runs the small local server. Boost and Vault don't need it. |
 | **Same Wi-Fi** | Drop only | Your phone and computer on one network (guest networks often isolate devices) |
@@ -57,6 +58,8 @@
 2. Open `chrome://extensions` and turn on **Developer mode** (top right).
 3. Click **Load unpacked** and pick the **`kit/extension`** folder.
 4. Pin Kit from the puzzle-piece menu. The buddy is **purple and awake** while something is running, **grey and asleep** when idle.
+
+**Firefox:** open **[kit-firefox.xpi](https://github.com/KumarDeepak16/kit/releases/latest/download/kit-firefox.xpi)** in Firefox and click **Add**. For Drop, also download kit.zip for the helper below.
 
 **For Drop (one time):** open `kit/helper` and double-click **`install.cmd`** (Windows) or run `sh install.sh` (macOS / Linux). Say yes to the firewall question so your phone can reach this computer.
 

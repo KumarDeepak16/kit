@@ -14,6 +14,7 @@ export const exclusive = (fn) => (data) => {
 };
 
 export async function hasOffscreen() {
+  if (!chrome.offscreen) return false; // Firefox: no offscreen documents, so no tab capture
   const contexts = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
   return contexts.length > 0;
 }

@@ -114,6 +114,7 @@ export default {
       note.className = `note${blocked() ? ' bad' : ''}`;
       if (blocked()) note.replaceChildren("This page can't be boosted");
       else if (!isHere()) note.replaceChildren(h('button', { type: 'button', onclick: () => focusTab(selected) }, 'Go to this tab', icon('arrow')));
+      else if (hint === 'protected' && !chrome.tabCapture) note.replaceChildren("Protected player — this browser can't boost it");
       else if (hint === 'protected')
         note.replaceChildren(
           'Protected player. ',

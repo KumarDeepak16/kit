@@ -21,11 +21,12 @@ function call(msg) {
       else pending?.resolve(reply);
       pending = null;
     });
-    port.onDisconnect.addListener(() => {
-      const reason = chrome.runtime.lastError?.message ?? '';
+    port.onDisconnect.addListener((p) => {
+      // Chrome reports through lastError, Firefox through port.error.
+      const reason = (p.error ?? chrome.runtime.lastError)?.message ?? '';
       port = null;
       settle(null);
-      pending?.reject(new Error(/not found|forbidden/i.test(reason) ? 'helper-missing' : reason || 'The Kit helper stopped'));
+      pending?.reject(new Error(/not found|forbidden|no such native/i.test(reason) ? 'helper-missing' : reason || 'The Kit helper stopped'));
       pending = null;
     });
   }
@@ -45,7 +46,7 @@ export default {
 
   handlers: {
     async start() {
-      const { type, ...info } = await call({ cmd: 'start' });
+      const { type, ...info } = await call({ cmd: 'start', origin: location.origin });
       await settle(info);
       return info;
     },
