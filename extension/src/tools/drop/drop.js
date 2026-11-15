@@ -24,7 +24,9 @@ export default {
     let events = null;
     let ipIndex = 0;
     let showQr = false;
-    let needsSetup = false;
+    let problem = null; // { code: 'helper-missing' | 'helper-forbidden' | 'helper-broken', detail }
+    // 'win' | 'mac' | 'linux' | 'cros' | ... — picks the install steps to show.
+    const os = (await chrome.runtime.getPlatformInfo().catch(() => null))?.os ?? '';
     let mode = '';
     let live = null; // { list, nodes }
 
@@ -62,10 +64,11 @@ export default {
       try {
         info = running(await send('start'));
         if (!info) throw new Error('The Kit helper did not start');
-        needsSetup = false;
+        problem = null;
         connect();
       } catch (err) {
-        if (err.message === 'helper-missing') needsSetup = true;
+        const [, code, detail] = /^(helper-\w+): ?(.*)$/s.exec(err.message) ?? [];
+        if (code) problem = { code, detail };
         else toast(err.message, 'error');
       }
       render();
@@ -88,21 +91,52 @@ export default {
       );
     }
 
+    // Install steps for this computer's OS; the helper writes its log where LOGS says.
+    const STEPS = {
+      win: [
+        ['Open the Kit folder → ', h('b', {}, 'helper')],
+        ['Double-click ', h('code', {}, 'install.cmd'), h('small', {}, 'Answer Y to the firewall question')],
+      ],
+      mac: [
+        ['Move the Kit folder to your home folder', h('small', {}, 'Not Downloads, Desktop or Documents — macOS blocks the helper there')],
+        ['Open Terminal, type ', h('code', {}, 'sh '), ' and drag in ', h('code', {}, 'helper/install.sh'), h('small', {}, 'Press Return. No sudo.')],
+      ],
+      linux: [
+        ['Open a terminal in Kit → ', h('b', {}, 'helper')],
+        ['Run ', h('code', {}, 'sh install.sh'), h('small', {}, 'No sudo.')],
+      ],
+    };
+    const LOGS = { win: '%LOCALAPPDATA%\\Kit\\kit-host.log', mac: '~/Library/Logs/Kit/kit-host.log', linux: '~/.local/state/kit/kit-host.log' };
+    const REASONS = {
+      'helper-missing': ['One-time setup', 'Drop runs a tiny server on this computer. Your browser needs a helper for that.'],
+      'helper-broken': [
+        "The helper didn't start",
+        os === 'mac'
+          ? 'Usually the Kit folder moved or sits in Downloads/Desktop/Documents, or Node.js changed.'
+          : 'Usually the Kit folder moved or Node.js changed. Run the installer again.',
+      ],
+      'helper-forbidden': ['This Kit copy is not allowed', 'The helper only talks to the official Kit. Load the extension folder from the Kit download unchanged, then run the installer again.'],
+    };
+
     function setupView() {
-      const retry = h('button', { class: 'btn primary blue wide', type: 'button', onclick: () => turnOn(retry) }, "Done — turn on");
+      if (!STEPS[os]) {
+        return h(
+          'div',
+          { class: 'pane gate setup' },
+          h('h2', {}, 'Not on this device'),
+          h('p', { class: 'hint' }, 'Drop needs a Windows, Mac or Linux computer — this device can’t run its helper.'),
+        );
+      }
+      const retry = h('button', { class: 'btn primary blue wide', type: 'button', onclick: () => turnOn(retry) }, 'Done — turn on');
+      const [title, hint] = REASONS[problem.code] ?? REASONS['helper-broken'];
       return h(
         'div',
         { class: 'pane gate setup' },
-        h('h2', {}, 'One-time setup'),
-        h('p', { class: 'hint' }, 'Drop runs a tiny server on this computer. Your browser needs a helper for that.'),
-        h(
-          'ol',
-          { class: 'steps' },
-          h('li', {}, 'Open the Kit folder → ', h('b', {}, 'helper')),
-          h('li', {}, 'Double-click ', h('code', {}, 'install.cmd'), h('small', {}, 'Mac / Linux: sh install.sh')),
-          h('li', {}, 'Come back and turn Drop on'),
-        ),
-        h('p', { class: 'fine' }, 'Needs Node.js 18+ (nodejs.org)'),
+        h('h2', {}, title),
+        h('p', { class: 'hint' }, hint),
+        h('ol', { class: 'steps' }, ...STEPS[os].map((parts) => h('li', {}, ...parts)), h('li', {}, 'Come back and turn Drop on')),
+        h('p', { class: 'fine' }, 'Node.js 18+ · Chrome, Edge, Brave or Firefox'),
+        problem.code !== 'helper-missing' && h('p', { class: 'fine why' }, problem.detail || 'No reason given', h('br'), `Log: ${LOGS[os]}`),
         retry,
       );
     }
@@ -296,7 +330,7 @@ export default {
     }
 
     function render() {
-      const next = !info ? (needsSetup ? 'setup' : 'off') : !snap ? 'qr' : showQr || (!snap.items.length && !snap.devices.length) ? 'qr' : 'live';
+      const next = !info ? (problem ? 'setup' : 'off') : !snap ? 'qr' : showQr || (!snap.items.length && !snap.devices.length) ? 'qr' : 'live';
       if (next === 'live' && mode === 'live') return syncThread();
       mode = next;
       root.replaceChildren(next === 'off' ? offView() : next === 'setup' ? setupView() : next === 'qr' ? qrView() : liveView());

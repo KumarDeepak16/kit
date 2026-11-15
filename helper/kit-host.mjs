@@ -27,7 +27,9 @@ const MIME = {
 const PAGE_CSP = "default-src 'self'; img-src 'self' blob: data:; style-src 'self'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'";
 
 const rid = (bytes = 8) => crypto.randomBytes(bytes).toString('hex');
-const log = (...a) => process.stderr.write(`[kit-host] ${a.join(' ')}\n`);
+// stderr goes to the log file the launcher sets up (see install.sh / install.ps1).
+const log = (...a) => process.stderr.write(`${new Date().toISOString()} [kit-host] ${a.join(' ')}\n`);
+log('start', VERSION, `node ${process.version}`, process.platform, process.execPath);
 
 // ---------------------------------------------------------------- native messaging
 

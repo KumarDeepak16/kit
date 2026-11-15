@@ -23,7 +23,7 @@ $Keys = @(
 
 if ($Uninstall) {
   foreach ($key in $Keys + $FirefoxKey) { if (Test-Path $key) { Remove-Item $key -Force } }
-  Remove-Item $Launcher, $ManifestPath, $FirefoxManifestPath -Force -ErrorAction SilentlyContinue
+  Remove-Item $Launcher, $ManifestPath, $FirefoxManifestPath, "$env:LOCALAPPDATA\Kit\kit-host.log" -Force -ErrorAction SilentlyContinue
   Write-Host 'Kit helper removed.' -ForegroundColor Green
   exit 0
 }
@@ -41,7 +41,10 @@ if ($Major -lt 18) {
 }
 
 # The browser launches this .cmd with stdin/stdout wired to the extension.
-[IO.File]::WriteAllText($Launcher, "@echo off`r`n`"$Node`" `"%~dp0kit-host.mjs`" %*`r`n", [Text.Encoding]::ASCII)
+# The helper's errors go to a log (overwritten each run) so there's something to read when Drop fails.
+$LogDir = Join-Path $env:LOCALAPPDATA 'Kit'
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+[IO.File]::WriteAllText($Launcher, "@echo off`r`n`"$Node`" `"%~dp0kit-host.mjs`" %* 2>`"$LogDir\kit-host.log`"`r`n", [Text.Encoding]::ASCII)
 
 $Manifest = [ordered]@{
   name            = $HostName

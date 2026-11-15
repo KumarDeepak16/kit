@@ -26,7 +26,12 @@ function call(msg) {
       const reason = (p.error ?? chrome.runtime.lastError)?.message ?? '';
       port = null;
       settle(null);
-      pending?.reject(new Error(/not found|forbidden|no such native/i.test(reason) ? 'helper-missing' : reason || 'The Kit helper stopped'));
+      if (pending) {
+        // A request was in flight, so the helper never answered: tell the popup why, with the browser's own words.
+        console.warn('[drop] helper failed:', reason || '(no reason given)');
+        const code = /not found|no such native/i.test(reason) ? 'helper-missing' : /forbidden/i.test(reason) ? 'helper-forbidden' : 'helper-broken';
+        pending.reject(new Error(`${code}: ${reason}`));
+      }
       pending = null;
     });
   }

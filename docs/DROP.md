@@ -9,7 +9,8 @@ Chrome doesn't allow extensions to open network ports, so Drop uses a small help
 1. Install **[Node.js 18 or newer](https://nodejs.org)** (the LTS version is fine).
 2. In the Kit folder, open **`helper`** and:
    - **Windows:** double-click **`install.cmd`**
-   - **macOS / Linux:** run `sh install.sh`
+   - **macOS:** keep the Kit folder in your home folder (not Downloads, Desktop or Documents — macOS blocks the helper there). Open Terminal, type `sh `, drag in `helper/install.sh`, press Return. No `sudo`.
+   - **Linux:** run `sh install.sh` (no `sudo`)
 3. **Windows:** answer **Y** to the firewall question (one UAC click) so other devices on your *private* network can reach this computer. If you skip it, Windows asks the first time a phone connects — choose *Allow* on private networks.
 
 That's it. The installer only registers the helper with your browsers (Chrome, Edge, Brave, Chromium) for your user account — no admin rights, nothing runs in the background.
@@ -56,11 +57,15 @@ On the computer (popup and full-screen view) the Copy-image button works directl
 
 | Problem | Fix |
 | --- | --- |
-| Kit shows **One-time setup** after installing | Reload Kit in `chrome://extensions`. Make sure `node --version` works in a terminal, then run the installer again. |
+| Kit shows **One-time setup** after installing | The installer lists the browsers it registered — yours must be there (Chrome, Edge, Brave, Chromium, Firefox; not Arc, Opera or Vivaldi). Run it without `sudo`, then reload Kit in `chrome://extensions`. |
+| **The helper didn't start** | The Kit folder moved, Node.js changed, or (macOS) Kit sits in Downloads/Desktop/Documents. Fix that and run the installer again. The reason is in the helper log. |
+| **This Kit copy is not allowed** | The extension ID doesn't match. Load the `extension` folder from the Kit download unchanged. |
 | The phone can't open the address | Both devices must be on the same Wi-Fi — guest networks and some office networks isolate devices. Allow Node.js through the firewall on private networks. Turn off VPNs. |
 | Several network adapters (VPN, virtual machines) | Tap **Wrong network? Try …** under the code to cycle through this computer's addresses. |
 | Phone says **Drop is off** | Drop was turned off or Chrome closed. Turn it on and scan the new QR. |
 | A file upload stopped | Phones pause browsers in the background. Keep the page open until it finishes. |
+
+**Helper log** (rewritten each time Drop turns on): Windows `%LOCALAPPDATA%\Kit\kit-host.log` · macOS `~/Library/Logs/Kit/kit-host.log` · Linux `~/.local/state/kit/kit-host.log`.
 
 ## Under the hood
 
