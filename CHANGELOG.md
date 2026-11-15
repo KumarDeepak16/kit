@@ -1,5 +1,18 @@
 # Changelog
 
+## 1.0.2 — 2026-11-15
+
+**Firefox**
+- Kit runs in Firefox. Boost uses its in-page engine there; Vault and Drop work unchanged.
+
+**Drop**
+- Setup shows the steps for your computer (Windows, macOS, Linux) and says when a device can't run Drop.
+- When the helper is missing, won't start or isn't allowed, Kit says which and shows the browser's reason.
+- The helper writes a log: `%LOCALAPPDATA%\Kit\kit-host.log`, `~/Library/Logs/Kit/kit-host.log` or `~/.local/state/kit/kit-host.log`.
+- `install.sh` always registers Chrome, lists the browsers it set up, refuses `sudo`, checks for Node.js 18+, works with nvm/fnm/volta, tests the helper and warns when macOS would block the Kit folder.
+
+**Upgrading:** run the helper installer again to get the log.
+
 ## 1.0.1 — 2026-10-07
 
 **Drop**

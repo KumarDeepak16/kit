@@ -12,7 +12,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 // Firefox gives each install its own moz-extension://<uuid> origin, so the extension
 // reports it on start; only an allowed extension can reach this native host at all.
 let extensionOrigin = 'chrome-extension://nbmfafaoglnmgabfcmkhcdhfbahgaffl';
